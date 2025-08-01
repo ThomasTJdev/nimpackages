@@ -16,7 +16,7 @@ RUN groupadd nimgroup \
 
 WORKDIR /home/nimmer
 
-COPY src/nimpackages /home/nimmer/nimpackages
+COPY nimpackages /home/nimmer/nimpackages
 
 CMD ["/home/nimmer/nimpackages"]
 
