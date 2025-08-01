@@ -1,0 +1,19 @@
+name: Build PROD
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-matrix:
+    strategy:
+      fail-fast: false
+      matrix:
+        nim: ["binary:2.2.4"]
+    uses: ./.github/workflows/builder.yaml
+    with:
+      container: 'nimpackages'
+      release: 'prod'
+      nimversion: ${{ matrix.nim }}
+    secrets: inherit

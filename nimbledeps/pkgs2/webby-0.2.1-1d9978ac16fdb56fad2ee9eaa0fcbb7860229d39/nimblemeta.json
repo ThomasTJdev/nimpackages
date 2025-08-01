@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "metaData": {
+    "url": "https://github.com/treeform/webby/",
+    "downloadMethod": "git",
+    "vcsRevision": "325d6ade0970562bee7d7d53961a2c3287f0c4bc",
+    "files": [
+      "/webby/urls.nim",
+      "/webby/queryparams.nim",
+      "/webby.nimble",
+      "/webby/internal.nim",
+      "/webby.nim",
+      "/webby/httpheaders.nim",
+      "/webby/multipart.nim"
+    ],
+    "binaries": [],
+    "specialVersions": [
+      "0.2.1"
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+name: Build MAIN
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-matrix:
+    strategy:
+      fail-fast: false
+      matrix:
+        nim: ["binary:2.2.4"]
+    uses: ./.github/workflows/builder.yaml
+    with:
+      container: 'nimpackages'
+      release: 'main'
+      nimversion: ${{ matrix.nim }}
+    secrets: inherit

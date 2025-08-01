@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "metaData": {
+    "url": "https://github.com/guzba/ready",
+    "downloadMethod": "git",
+    "vcsRevision": "e8dc4bbcda772dbc166969c029f9f64c5f10d4cd",
+    "files": [
+      "/ready.nimble",
+      "/ready.nim",
+      "/ready/pools.nim",
+      "/ready/connections.nim"
+    ],
+    "binaries": [],
+    "specialVersions": [
+      "0.1.9"
+    ]
+  }
+}

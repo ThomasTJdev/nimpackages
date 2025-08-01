@@ -1,0 +1,58 @@
+#
+# nimpackages.service for rootless deployment with podman and systemd
+#
+# Requires:
+# - podman
+# - systemd
+#
+# Can be updated with:
+# - podman auto-update
+# - podman auto-update --dry-run
+#
+# How to use:
+# $ cp nimpackages.service ~/.config/systemd/user/
+# $ podman pull ghcr.io/thomastjdev/nimpackages:latest
+# $ systemctl --user start nimpackages
+# $ systemctl --user status nimpackages
+# $ systemctl --user enable nimpackages
+#
+
+[Unit]
+Description=Podman nimpackages.service
+Documentation=man:podman-generate-systemd(1)
+Wants=network-online.target
+After=network-online.target
+RequiresMountsFor=%t/containers
+
+[Service]
+Environment=PODMAN_SYSTEMD_UNIT=%n
+Restart=always
+RestartSec=3
+TimeoutStopSec=70
+ExecStartPre=/bin/rm -f %t/%n.ctr-id
+ExecStart=/usr/bin/podman run \
+        --cidfile=%t/%n.ctr-id \
+        --cgroups=no-conmon \
+        --rm \
+        --sdnotify=conmon \
+        -d \
+        --replace \
+        --name nimpackages \
+        --init \
+        --network host \
+        --label io.containers.autoupdate=registry \
+        --log-driver journald \
+        --log-opt tag=nimpackages \
+        ghcr.io/thomastjdev/nimpackages:latest
+ExecStop=/usr/bin/podman stop \
+        --ignore \
+        --cidfile=%t/%n.ctr-id
+ExecStopPost=/usr/bin/podman rm \
+        -f \
+        --ignore \
+        --cidfile=%t/%n.ctr-id
+Type=notify
+NotifyAccess=all
+
+[Install]
+WantedBy=multi-user.target default.target

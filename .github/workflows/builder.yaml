@@ -1,0 +1,206 @@
+name: Build it
+
+on:
+  workflow_call:
+    inputs:
+      container:
+        required: true
+        type: string
+      release:
+        required: true
+        type: string
+      nimversion:
+        required: true
+        type: string
+
+
+env:
+  REGISTRY_USER: ${{ github.actor }}
+  REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+  IMAGE_REGISTRY: ghcr.io/thomastjdev
+
+
+jobs:
+  build:
+    permissions:
+      contents: write
+      packages: write
+
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - uses: actions/checkout@v4
+
+
+      #
+      # Nim
+      #
+      - name: Cache Nim binaries
+        uses: actions/cache@v4
+        with:
+          path: |
+            nimdir
+            ~/.nimble
+          key: "nim-${{ inputs.nimversion }}"
+
+      - name: Check for cached Nim binaries
+        id: nim-binaries-cache
+        run: |
+          if [ -f "nimdir/bin/nim" ]; then
+            echo "found=true" >> $GITHUB_OUTPUT
+          else
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install Nim (if not cached)
+        if: steps.nim-binaries-cache.outputs.found == 'false'
+        uses: iffy/install-nim@v5
+        with:
+          version: ${{ inputs.nimversion }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Add cached Nim to PATH
+        if: steps.nim-binaries-cache.outputs.found == 'true'
+        run: |
+          echo "${{ github.workspace }}/nimdir/bin" >> $GITHUB_PATH
+          echo "$HOME/.nimble/bin" >> $GITHUB_PATH
+
+
+      #
+      # Nim
+      #
+      - name: Print Nim version
+        run: |
+          nim -v
+
+      - name: Print Nimble version
+        run: |
+          nimble -v
+
+
+      #
+      # We are using local dep
+      #
+      - name: Nimble check
+        run: |
+          nimble check
+
+
+
+      #
+      # Build core
+      #
+      - name: Build project
+        run: |
+          nimble build -d:release
+
+
+
+
+
+      #
+      # Startup podman and make ready
+      #
+      - name: Start podman service
+        run: |
+          sudo systemctl start podman
+
+      - name: Github tag or branch
+        run: |
+          echo ${{github.ref_name}}
+
+
+      #
+      # Login to AWS ECR registry
+      #
+      - name: Log in to ghcr.io
+        uses: redhat-actions/podman-login@v1
+        with:
+          username: ${{ env.REGISTRY_USER }}
+          password: ${{ env.REGISTRY_PASSWORD }}
+          registry: ${{ env.IMAGE_REGISTRY }}
+
+      - name: Add registry to podman
+        run: |
+          podman login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+
+
+
+      #
+      # Build images from container files
+      # - The order is the for improving caching of the build
+      #
+      - name: Build image
+        run: |
+          podman build \
+            -f containers/${{ inputs.container }}.ContainerFile . \
+            -t ${{ inputs.container }} \
+            --label "org.opencontainers.image.created=$(date --iso-8601=seconds)" \
+            --label "org.opencontainers.image.version=${{github.ref_name}}" \
+            --label "org.opencontainers.image.vendor=ThomasTJdev" \
+            --label "org.opencontainers.image.source=https://github.com/ThomasTJdev/nimpackages" \
+            | tee build.log
+
+
+
+      #
+      # Tag images with version and latest
+      #
+      - name: Tag image
+        if: inputs.release == 'prod'
+        run: |
+          podman tag ${{ inputs.container }} $IMAGE_REGISTRY/${{ inputs.container }}:latest
+          podman tag ${{ inputs.container }} $IMAGE_REGISTRY/${{ inputs.container }}:${{github.ref_name}}
+
+
+
+      #
+      # Show images
+      #
+      - name: Show images
+        run: |
+          podman images
+
+
+      #
+      # Push images to registry
+      #
+      - name: Push image to registry PROD
+        if: inputs.release == 'prod'
+        run: |
+          podman push $IMAGE_REGISTRY/${{ inputs.container }}:latest
+          podman push $IMAGE_REGISTRY/${{ inputs.container }}:${{github.ref_name}}
+
+
+
+
+      #
+      # We using tags "latest" and the version tag
+      #
+      - name: Container tags
+        if: inputs.release == 'prod'
+        run: |
+          container_repotags="latest,${{github.ref_name}}"
+          echo "image-tags=$container_repotags" >> "$GITHUB_OUTPUT"
+
+      - name: Get digest from GitHub Container Registry
+        if: inputs.release == 'prod'
+        run: |
+          digest_hash=$(podman inspect --format '{{.Digest}}' $IMAGE_REGISTRY/${{ inputs.container }}:latest)
+          echo "image-digest=$digest_hash" >> "$GITHUB_OUTPUT"
+          echo "digest_hash=${digest_hash}" >> $GITHUB_ENV
+
+
+      #
+      # Upload artifacts
+      #
+      - name: Attach build log to artifact
+        if: inputs.release == 'prod'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.container }}-build-log
+          path: build.log

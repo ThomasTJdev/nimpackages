@@ -1,0 +1,49 @@
+# valkey.service
+
+[Unit]
+Description=Podman valkey.service
+Documentation=man:podman-generate-systemd(1)
+Wants=network-online.target
+After=network-online.target
+RequiresMountsFor=%t/containers
+
+[Service]
+Environment=PODMAN_SYSTEMD_UNIT=%n
+Restart=always
+RestartSec=3
+TimeoutStopSec=70
+ExecStartPre=/bin/rm -f %t/%n.ctr-id
+ExecStart=/usr/bin/podman run \
+  --cidfile=%t/%n.ctr-id \
+  --cgroups=no-conmon \
+  --rm \
+  --sdnotify=conmon \
+  -d \
+  --replace \
+  --name valkey \
+  --init \
+  --network host \
+  --label io.containers.autoupdate=registry \
+  --log-driver journald \
+  --log-opt tag=valkey \
+  --memory=2g \
+  -v valkey-data:/data:Z \
+  docker.io/valkey/valkey:8.0.1 \
+    --loglevel warning \
+    --maxmemory 1850MB \
+    --maxmemory-policy allkeys-lru \
+    --lazyfree-lazy-eviction yes \
+    --lazyfree-lazy-expire yes \
+    --lazyfree-lazy-user-del yes
+ExecStop=/usr/bin/podman stop \
+        --ignore \
+        --cidfile=%t/%n.ctr-id
+ExecStopPost=/usr/bin/podman rm \
+        -f \
+        --ignore \
+        --cidfile=%t/%n.ctr-id
+Type=notify
+NotifyAccess=all
+
+[Install]
+WantedBy=multi-user.target default.target

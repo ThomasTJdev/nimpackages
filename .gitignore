@@ -1,3 +1,9 @@
 nimcache/
 nimblecache/
 htmldocs/
+packages.json
+nimbledeps/bin
+nimbledeps/pkgcache
+nimbledeps/pkgs
+nimbledeps/nimbledata.json
+nimbledeps/packages_temp.json

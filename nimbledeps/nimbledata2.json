@@ -1,0 +1,105 @@
+{
+  "version": 1,
+  "reverseDeps": {
+    "nimsimd": {
+      "1.3.2": {
+        "5202ce48d46eaf593da54e884774cdb2a884e717": [
+          {
+            "name": "crunchy",
+            "version": "0.1.11",
+            "checksum": "d34f03fc0f6876dbf53f99601096728ec31f47a3"
+          }
+        ]
+      }
+    },
+    "zippy": {
+      "0.10.16": {
+        "da3bb5ea388f980babcc29760348e2899d29a639": [
+          {
+            "name": "mummy",
+            "version": "0.4.7",
+            "checksum": "d30a9eb8a7df829e6db71c6861e374bfa14a0f36"
+          },
+          {
+            "name": "mummy",
+            "version": "0.4.5",
+            "checksum": "cb7f70cd4d6fd3a563e00e664cfbd8cbd3c39b79"
+          }
+        ]
+      }
+    },
+    "webby": {
+      "0.2.1": {
+        "1d9978ac16fdb56fad2ee9eaa0fcbb7860229d39": [
+          {
+            "name": "mummy",
+            "version": "0.4.7",
+            "checksum": "d30a9eb8a7df829e6db71c6861e374bfa14a0f36"
+          },
+          {
+            "name": "mummy",
+            "version": "0.4.5",
+            "checksum": "cb7f70cd4d6fd3a563e00e664cfbd8cbd3c39b79"
+          }
+        ]
+      }
+    },
+    "crunchy": {
+      "0.1.11": {
+        "d34f03fc0f6876dbf53f99601096728ec31f47a3": [
+          {
+            "name": "mummy",
+            "version": "0.4.7",
+            "checksum": "d30a9eb8a7df829e6db71c6861e374bfa14a0f36"
+          },
+          {
+            "name": "mummy",
+            "version": "0.4.5",
+            "checksum": "cb7f70cd4d6fd3a563e00e664cfbd8cbd3c39b79"
+          }
+        ]
+      }
+    },
+    "mummy": {
+      "0.4.5": {
+        "cb7f70cd4d6fd3a563e00e664cfbd8cbd3c39b79": [
+          {
+            "name": "mummy_utils",
+            "version": "0.1.0",
+            "checksum": "3a72eb57fa9f2e106a7badef00720461fcaa21c4"
+          }
+        ]
+      },
+      "0.4.7": {
+        "d30a9eb8a7df829e6db71c6861e374bfa14a0f36": [
+          {
+            "path": "/home/user/git/nimpackages"
+          },
+          {
+            "name": "mummy_utils",
+            "version": "0.1.0",
+            "checksum": "3a72eb57fa9f2e106a7badef00720461fcaa21c4"
+          }
+        ]
+      }
+    },
+    "ready": {
+      "0.1.9": {
+        "eb012005ecdfb8aa78e8226241a58fd800829bec": [
+          {
+            "path": "/home/user/git/nimpackages"
+          }
+        ]
+      }
+    },
+    "mummy_utils": {
+      "0.1.0": {
+        "3a72eb57fa9f2e106a7badef00720461fcaa21c4": [
+          {
+            "path": "/home/user/git/nimpackages"
+          }
+        ]
+      }
+    }
+  }
+}
