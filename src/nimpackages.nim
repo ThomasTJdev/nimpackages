@@ -1,9 +1,16 @@
-import std/json
-import mummy, mummy/routers, mummy_utils
+import std/[
+  json
+]
 
-import ./cron
-import ./packages
-import ./html
+import
+  mummy, mummy/routers,
+  mummy_utils
+
+import
+  ./cache,
+  ./cron,
+  ./html,
+  ./packages
 
 proc indexHandler(request: Request) =
   var headers: HttpHeaders
@@ -12,10 +19,47 @@ proc indexHandler(request: Request) =
   let html = indexPackagesAll()
   request.respond(200, headers, html)
 
+proc htmlSearchHandler(request: Request) =
+  var headers: HttpHeaders
+  headers["Content-Type"] = "text/html; charset=utf-8"
+
+  let query = @"q"
+  if query.len == 0:
+    # Redirect to home if no query
+    headers["Location"] = "/"
+    request.respond(302, headers, "")
+    return
+
+  let html = indexPackagesSearch(query)
+  request.respond(200, headers, html)
+
+proc htmlPackageHandler(request: Request) =
+  var headers: HttpHeaders
+  headers["Content-Type"] = "text/html; charset=utf-8"
+
+  let name = @"name"
+  if name.len == 0:
+    headers["Location"] = "/"
+    request.respond(302, headers, "")
+    return
+
+  let html = packageDetails(name)
+  request.respond(200, headers, html)
+
+proc apiEndpointsHandler(request: Request) =
+  var headers: HttpHeaders
+  headers["Content-Type"] = "text/html; charset=utf-8"
+
+  let html = apiEndpoints()
+  request.respond(200, headers, html)
+
+
 proc packagesHandler(request: Request) =
   var headers: HttpHeaders
   headers["Content-Type"] = "application/json"
   headers["Access-Control-Allow-Origin"] = "*"
+
+  ratelimitHeaders(request, headers)
 
   let packages = getAllPackages()
   var packagesJson = newJArray()
@@ -34,6 +78,8 @@ proc searchHandler(request: Request) =
   var headers: HttpHeaders
   headers["Content-Type"] = "application/json"
   headers["Access-Control-Allow-Origin"] = "*"
+
+  ratelimitHeaders(request, headers)
 
   let query = @"q"
   if query.len == 0:
@@ -63,6 +109,8 @@ proc simpleSearchHandler(request: Request) =
   headers["Content-Type"] = "application/json"
   headers["Access-Control-Allow-Origin"] = "*"
 
+  ratelimitHeaders(request, headers)
+
   let query = request.queryParams["q"]
   if query.len == 0:
     request.respond(400, headers, $(%*{"error": "Query parameter 'q' is required"}))
@@ -82,37 +130,12 @@ proc simpleSearchHandler(request: Request) =
 
   request.respond(200, headers, $response)
 
-proc htmlSearchHandler(request: Request) =
-  var headers: HttpHeaders
-  headers["Content-Type"] = "text/html; charset=utf-8"
-
-  let query = @"q"
-  if query.len == 0:
-    # Redirect to home if no query
-    headers["Location"] = "/"
-    request.respond(302, headers, "")
-    return
-
-  let html = indexPackagesSearch(query)
-  request.respond(200, headers, html)
-
-proc htmlPackageHandler(request: Request) =
-  var headers: HttpHeaders
-  headers["Content-Type"] = "text/html; charset=utf-8"
-
-  let name = @"name"
-  if name.len == 0:
-    headers["Location"] = "/"
-    request.respond(302, headers, "")
-    return
-
-  let html = packageDetails(name)
-  request.respond(200, headers, html)
-
 proc tagSearchHandler(request: Request) =
   var headers: HttpHeaders
   headers["Content-Type"] = "application/json"
   headers["Access-Control-Allow-Origin"] = "*"
+
+  ratelimitHeaders(request, headers)
 
   let tag = @"tag"
   if tag.len == 0:
@@ -138,6 +161,8 @@ proc packageHandler(request: Request) =
   headers["Content-Type"] = "application/json"
   headers["Access-Control-Allow-Origin"] = "*"
 
+  ratelimitHeaders(request, headers)
+
   let name = @"name"
   if name.len == 0:
     request.respond(400, headers, $(%*{"error": "Package name is required"}))
@@ -155,6 +180,8 @@ proc statsHandler(request: Request) =
   headers["Content-Type"] = "application/json"
   headers["Access-Control-Allow-Origin"] = "*"
 
+  ratelimitHeaders(request, headers)
+
   let response = %*{
     "total_packages": getPackageCount(),
     "last_updated": getLastUpdated()
@@ -167,6 +194,7 @@ var router: Router
 router.get("/", indexHandler)
 router.get("/search", htmlSearchHandler)
 router.get("/package/@name", htmlPackageHandler)
+router.get("/api", apiEndpointsHandler)
 router.get("/api/packages", packagesHandler)
 router.get("/api/packages/search", searchHandler)
 router.get("/api/packages/search/simple", simpleSearchHandler)

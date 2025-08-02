@@ -428,6 +428,7 @@ proc indexPackagesAll*(): string =
         <p style="text-align: center; color: #666; padding: 40px;">
           Use the search bar above to discover Nim packages.
           <br>Try searching for: <strong>clap</strong>, <strong>http</strong>, <strong>json</strong>, or <strong>async</strong>
+          <br>Or access the <a href="/api">API</a> endpoints.
         </p>
       </div>
     </div>
@@ -641,6 +642,155 @@ proc packageDetails*(name: string): string =
   </body>
   </html>
   """
+
+proc apiEndpoints*(): string =
+  result = """
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    """ & getEnv("HTML_HEAD") & """
+    <title>API Endpoints - Nim Packages</title>
+    <style>""" & css & """</style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <a href="/">
+          <div style="display: flex; justify-content: center; align-items: center; gap: 20px; ">
+            <div class="stat-number" style="position: relative;">
+              <span style="position: absolute; top: -8px; left: 50%; transform: translateX(-50%); font-size: 0.8em;">👑</span>
+              <span style="margin-top: 8px; display: inline-block;">📦</span>
+            </div>
+            <h1>Nim Packages</h1>
+          </div>
+        </a>
+        <p>API Endpoints</p>
+      </div>
+
+      <div class="results-container">
+        <div class="results-header">
+          <h2>API Endpoints</h2>
+          <a href="/" class="back-link">← Back to Home</a>
+        </div>
+
+        <div style="margin-bottom: 30px;">
+          <h3 style="color: #333; margin-bottom: 15px;">📡 REST API</h3>
+          <p style="color: #666; margin-bottom: 20px;">
+            All endpoints return JSON responses and support CORS for cross-origin requests.
+          </p>
+        </div>
+
+        <div style="display: grid; gap: 20px;">
+          <div class="package-card">
+            <div class="package-header">
+              <span class="package-name">GET /api/packages</span>
+              <span class="package-score">JSON</span>
+            </div>
+            <div class="package-description">Get all packages in the database</div>
+            <div class="package-meta">
+              <span>📊 Returns: Array of packages</span>
+              <span>🔗 <a href="/api/packages" target="_blank">Try it</a></span>
+            </div>
+          </div>
+
+          <div class="package-card">
+            <div class="package-header">
+              <span class="package-name">GET /api/packages/search?q=&lt;query&gt;</span>
+              <span class="package-score">JSON</span>
+            </div>
+            <div class="package-description">Search packages with scoring and relevance ranking (high quality only)</div>
+            <div class="package-meta">
+              <span>📊 Returns: Scored results with match types</span>
+              <span>🎯 Score 40+: name, description, tag matches</span>
+              <span>🔗 <a href="/api/packages/search?q=clap" target="_blank">Try it</a></span>
+            </div>
+          </div>
+
+          <div class="package-card">
+            <div class="package-header">
+              <span class="package-name">GET /api/packages/search/simple?q=&lt;query&gt;</span>
+              <span class="package-score">JSON</span>
+            </div>
+            <div class="package-description">Simple search packages (high quality only)</div>
+            <div class="package-meta">
+              <span>📊 Returns: Array of packages</span>
+              <span>🎯 Score 40+: name, description, tag matches</span>
+              <span>🔗 <a href="/api/packages/search/simple?q=http" target="_blank">Try it</a></span>
+            </div>
+          </div>
+
+          <div class="package-card">
+            <div class="package-header">
+              <span class="package-name">GET /api/packages/tag/&lt;tag&gt;</span>
+              <span class="package-score">JSON</span>
+            </div>
+            <div class="package-description">Search packages by specific tag</div>
+            <div class="package-meta">
+              <span>📊 Returns: Array of packages with matching tag</span>
+              <span>🔗 <a href="/api/packages/tag/http" target="_blank">Try it</a></span>
+            </div>
+          </div>
+
+          <div class="package-card">
+            <div class="package-header">
+              <span class="package-name">GET /api/packages/&lt;name&gt;</span>
+              <span class="package-score">JSON</span>
+            </div>
+            <div class="package-description">Get specific package by name</div>
+            <div class="package-meta">
+              <span>📊 Returns: Single package object</span>
+              <span>🔗 <a href="/api/packages/yaclap" target="_blank">Try it</a></span>
+            </div>
+          </div>
+
+          <div class="package-card">
+            <div class="package-header">
+              <span class="package-name">GET /api/stats</span>
+              <span class="package-score">JSON</span>
+            </div>
+            <div class="package-description">Get package statistics and metadata</div>
+            <div class="package-meta">
+              <span>📊 Returns: Total packages, last updated timestamp</span>
+              <span>🔗 <a href="/api/stats" target="_blank">Try it</a></span>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+          <h3 style="color: #333; margin-bottom: 15px;">🛡️ Rate Limiting</h3>
+          <p style="color: #666; margin-bottom: 10px;">
+            Rate limiting is enabled to ensure fair usage of the API:
+          </p>
+          <ul style="color: #666; margin-left: 20px;">
+            <li>Maximum 60 requests per minute per IP address</li>
+            <li>Exceeding the limit will result in a 429 Too Many Requests response</li>
+            <li>Rate limits reset every minute automatically</li>
+            <li>Rate limit headers are included in all responses</li>
+          </ul>
+        </div>
+
+        <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+          <h3 style="color: #333; margin-bottom: 15px;">📋 Response Format</h3>
+          <p style="color: #666; margin-bottom: 10px;">
+            All API responses follow a consistent JSON format:
+          </p>
+          <div style="background: #2d3748; color: #e2e8f0; padding: 15px; border-radius: 8px; font-family: 'Monaco', 'Menlo', monospace; font-size: 0.9rem; overflow-x: auto;">
+            <pre>{
+  "packages": [...],
+  "count": 123,
+  "query": "search term",
+  "searchInfo": {
+    "description": "High-quality results only (score 40+)"
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      Copyright <a href="https://github.com/ThomasTJdev/nimpackages">Thomas T. Jarloev (TTJ)</a><br>Hosted by <a href="https://cxplanner.com">CxPlanner</a><br>We love <a href="https://nim-lang.org">Nim</a>
     </div>
   </body>
   </html>
