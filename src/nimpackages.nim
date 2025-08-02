@@ -15,45 +15,29 @@ import
 const favicon = staticRead("../resources/favicon.ico")
 
 proc indexHandler(request: Request) =
-  var headers: HttpHeaders
-  headers["Content-Type"] = "text/html; charset=utf-8"
-
   let html = indexPackagesAll()
-  request.respond(200, headers, html)
+  resp(Http200, html)
 
 proc htmlSearchHandler(request: Request) =
-  var headers: HttpHeaders
-  headers["Content-Type"] = "text/html; charset=utf-8"
 
   let query = @"q"
   if query.len == 0:
-    # Redirect to home if no query
-    headers["Location"] = "/"
-    request.respond(302, headers, "")
-    return
+    redirect(Http302, "/")
 
   let html = indexPackagesSearch(query)
-  request.respond(200, headers, html)
+  resp(Http200, html)
 
 proc htmlPackageHandler(request: Request) =
-  var headers: HttpHeaders
-  headers["Content-Type"] = "text/html; charset=utf-8"
-
   let name = @"name"
   if name.len == 0:
-    headers["Location"] = "/"
-    request.respond(302, headers, "")
-    return
+    redirect(Http302, "/")
 
   let html = packageDetails(name)
-  request.respond(200, headers, html)
+  resp(Http200, html)
 
 proc apiEndpointsHandler(request: Request) =
-  var headers: HttpHeaders
-  headers["Content-Type"] = "text/html; charset=utf-8"
-
   let html = apiEndpoints()
-  request.respond(200, headers, html)
+  resp(Http200, html)
 
 
 proc packagesHandler(request: Request) =
@@ -74,7 +58,7 @@ proc packagesHandler(request: Request) =
     "count": packages.len
   }
 
-  request.respond(200, headers, $response)
+  resp(Http200, headers, $response)
 
 proc searchHandler(request: Request) =
   var headers: HttpHeaders
@@ -85,7 +69,7 @@ proc searchHandler(request: Request) =
 
   let query = @"q"
   if query.len == 0:
-    request.respond(400, headers, $(%*{"error": "Query parameter 'q' is required"}))
+    resp(Http400, headers, $(%*{"error": "Query parameter 'q' is required"}))
     return
 
   # Use the improved search with scoring
@@ -104,7 +88,7 @@ proc searchHandler(request: Request) =
     }
   }
 
-  request.respond(200, headers, $response)
+  resp(Http200, headers, $response)
 
 proc simpleSearchHandler(request: Request) =
   var headers: HttpHeaders
@@ -115,7 +99,7 @@ proc simpleSearchHandler(request: Request) =
 
   let query = request.queryParams["q"]
   if query.len == 0:
-    request.respond(400, headers, $(%*{"error": "Query parameter 'q' is required"}))
+    resp(Http400, headers, $(%*{"error": "Query parameter 'q' is required"}))
     return
 
   let packages = searchPackages(query)
@@ -130,7 +114,7 @@ proc simpleSearchHandler(request: Request) =
     "query": query
   }
 
-  request.respond(200, headers, $response)
+  resp(Http200, headers, $response)
 
 proc tagSearchHandler(request: Request) =
   var headers: HttpHeaders
@@ -141,7 +125,7 @@ proc tagSearchHandler(request: Request) =
 
   let tag = @"tag"
   if tag.len == 0:
-    request.respond(400, headers, $(%*{"error": "Tag parameter is required"}))
+    resp(Http400, headers, $(%*{"error": "Tag parameter is required"}))
     return
 
   let packages = searchPackagesByTag(tag)
@@ -156,7 +140,7 @@ proc tagSearchHandler(request: Request) =
     "tag": tag
   }
 
-  request.respond(200, headers, $response)
+  resp(Http200, headers, $response)
 
 proc packageHandler(request: Request) =
   var headers: HttpHeaders
@@ -167,15 +151,15 @@ proc packageHandler(request: Request) =
 
   let name = @"name"
   if name.len == 0:
-    request.respond(400, headers, $(%*{"error": "Package name is required"}))
+    resp(Http400, headers, $(%*{"error": "Package name is required"}))
     return
 
   let package = getPackage(name)
   if package.name.len == 0:
-    request.respond(404, headers, $(%*{"error": "Package not found"}))
+    resp(Http404, headers, $(%*{"error": "Package not found"}))
     return
 
-  request.respond(200, headers, $toJson(package))
+  resp(Http200, headers, $toJson(package))
 
 proc statsHandler(request: Request) =
   var headers: HttpHeaders
@@ -189,13 +173,18 @@ proc statsHandler(request: Request) =
     "last_updated": getLastUpdated()
   }
 
-  request.respond(200, headers, $response)
+  resp(Http200, headers, $response)
 
 proc faviconHandler(request: Request) =
   var headers: HttpHeaders
   headers["Content-Type"] = "image/x-icon"
-  request.respond(200, headers, favicon)
+  resp(Http200, headers, favicon)
 
+proc statusHandlerHead(request: Request) =
+  resp(Http200)
+
+proc statusHandlerGet(request: Request) =
+  resp(Http200, ContentType.Json, """{"status": "OK"}""")
 
 var router: Router
 router.get("/", indexHandler)
@@ -209,6 +198,9 @@ router.get("/api/packages/tag/@tag", tagSearchHandler)
 router.get("/api/packages/@name", packageHandler)
 router.get("/api/stats", statsHandler)
 router.get("/favicon.ico", faviconHandler)
+
+router.head("/", statusHandlerHead)
+router.get("/status", statusHandlerGet)
 
 var thread: Thread[void]
 proc main() =
