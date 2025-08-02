@@ -15,8 +15,8 @@ proc updatePackages*() {.thread.} =
     let client = newHttpClient()
     let response = client.get("https://raw.githubusercontent.com/nim-lang/packages/refs/heads/master/packages.json")
     packages = response.body.parseJson()
-
     echo "Packages: ", packages.len
+
   when defined(dev):
     if fileExists("packages.json"):
       packages = readFile("packages.json").parseJson()
@@ -64,5 +64,5 @@ proc updatePackages*() {.thread.} =
     discard conn.command("SET", "packages_count", $packages.len)
     discard conn.command("SET", "last_updated", $getTime().toUnix())
 
-  sleep(86400 * 1000)
-  echo "Updated packages"
+  echo "Packages updated"
+  sleep(43200 * 1000)
