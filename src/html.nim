@@ -370,6 +370,7 @@ proc indexPackagesAll*(): string =
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     """ & getEnv("HTML_HEAD") & """
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <title>Nim Packages - Discover Nim Libraries</title>
     <style>""" & css & """</style>
   </head>
@@ -482,6 +483,7 @@ proc indexPackagesSearch*(query: string): string =
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     """ & getEnv("HTML_HEAD") & """
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <title>Search Results - Nim Packages</title>
     <style>""" & css & """</style>
   </head>
@@ -542,6 +544,7 @@ proc packageDetails*(name: string): string =
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       """ & getEnv("HTML_HEAD") & """
+      <link rel="icon" href="/favicon.ico" type="image/x-icon">
       <title>Package Not Found - Nim Packages</title>
       <style>""" & css & """</style>
     </head>
@@ -583,6 +586,7 @@ proc packageDetails*(name: string): string =
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     """ & getEnv("HTML_HEAD") & """
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <title>""" & package.name.xmlEncode & """ - Nim Packages</title>
     <style>""" & css & """</style>
   </head>
@@ -651,6 +655,7 @@ proc apiEndpoints*(): string =
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     """ & getEnv("HTML_HEAD") & """
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <title>API Endpoints - Nim Packages</title>
     <style>""" & css & """</style>
   </head>

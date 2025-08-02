@@ -12,6 +12,8 @@ import
   ./html,
   ./packages
 
+const favicon = staticRead("../resources/favicon.ico")
+
 proc indexHandler(request: Request) =
   var headers: HttpHeaders
   headers["Content-Type"] = "text/html; charset=utf-8"
@@ -189,6 +191,11 @@ proc statsHandler(request: Request) =
 
   request.respond(200, headers, $response)
 
+proc faviconHandler(request: Request) =
+  var headers: HttpHeaders
+  headers["Content-Type"] = "image/x-icon"
+  request.respond(200, headers, favicon)
+
 
 var router: Router
 router.get("/", indexHandler)
@@ -201,6 +208,7 @@ router.get("/api/packages/search/simple", simpleSearchHandler)
 router.get("/api/packages/tag/@tag", tagSearchHandler)
 router.get("/api/packages/@name", packageHandler)
 router.get("/api/stats", statsHandler)
+router.get("/favicon.ico", faviconHandler)
 
 var thread: Thread[void]
 proc main() =
