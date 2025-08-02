@@ -70,7 +70,6 @@ proc searchHandler(request: Request) =
   let query = @"q"
   if query.len == 0:
     resp(Http400, headers, $(%*{"error": "Query parameter 'q' is required"}))
-    return
 
   # Use the improved search with scoring
   let searchResults = searchPackagesWithScore(query)
@@ -100,7 +99,6 @@ proc simpleSearchHandler(request: Request) =
   let query = request.queryParams["q"]
   if query.len == 0:
     resp(Http400, headers, $(%*{"error": "Query parameter 'q' is required"}))
-    return
 
   let packages = searchPackages(query)
   var packagesJson = newJArray()
@@ -126,7 +124,6 @@ proc tagSearchHandler(request: Request) =
   let tag = @"tag"
   if tag.len == 0:
     resp(Http400, headers, $(%*{"error": "Tag parameter is required"}))
-    return
 
   let packages = searchPackagesByTag(tag)
   var packagesJson = newJArray()
@@ -152,12 +149,10 @@ proc packageHandler(request: Request) =
   let name = @"name"
   if name.len == 0:
     resp(Http400, headers, $(%*{"error": "Package name is required"}))
-    return
 
   let package = getPackage(name)
   if package.name.len == 0:
     resp(Http404, headers, $(%*{"error": "Package not found"}))
-    return
 
   resp(Http200, headers, $toJson(package))
 
