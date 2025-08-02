@@ -1,11 +1,13 @@
 import std/[
   cgi,
+  envvars,
   strutils,
   sequtils,
   times
 ]
 
-import ./packages
+import
+  ./packages
 
 const css = """
   * {
@@ -367,19 +369,22 @@ proc indexPackagesAll*(): string =
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    """ & getEnv("HTML_HEAD") & """
     <title>Nim Packages - Discover Nim Libraries</title>
     <style>""" & css & """</style>
   </head>
   <body>
     <div class="container">
       <div class="header">
-        <div style="display: flex; justify-content: center; align-items: center; gap: 20px; ">
-          <div class="stat-number" style="position: relative;">
-            <span style="position: absolute; top: -8px; left: 50%; transform: translateX(-50%); font-size: 0.8em;">👑</span>
-            <span style="margin-top: 8px; display: inline-block;">📦</span>
+        <a href="/">
+          <div style="display: flex; justify-content: center; align-items: center; gap: 20px; ">
+            <div class="stat-number" style="position: relative;">
+              <span style="position: absolute; top: -8px; left: 50%; transform: translateX(-50%); font-size: 0.8em;">👑</span>
+              <span style="margin-top: 8px; display: inline-block;">📦</span>
+            </div>
+            <h1>Nim Packages</h1>
           </div>
-          <h1>Nim Packages</h1>
-        </div>
+        </a>
         <p>Discover and explore Nim libraries and packages</p>
         <p>Learn more about <a href="https://nim-lang.org" target="_blank">Nim here</a> and <a href="https://nim-lang.github.io/nimble/" target="_blank">Nimble here</a></p>
       </div>
@@ -407,7 +412,7 @@ proc indexPackagesAll*(): string =
             <div class="stat-label">Last Updated</div>
           </div>
           <div class="stat-card">
-            <div class="stat-label">Install with Nimble</div>
+            <div class="stat-label" style="text-align: left;">Install with Nimble</div>
             <div style="margin-top: 10px; font-family: 'Monaco', 'Menlo', monospace; font-size: 0.8rem; color: #666; text-align: left;">
               <div style="margin-bottom: 5px;">$ nimble install &lt;pkg&gt;</div>
               <div>$ nimble install --depsOnly</div>
@@ -426,8 +431,8 @@ proc indexPackagesAll*(): string =
         </p>
       </div>
     </div>
-    <div style="text-align: center; padding: 20px; color: #666;">
-      Copyright Thomas T. Jarløv (TTJ) - ttj@ttj.dk
+    <div class="footer">
+      Copyright <a href="https://github.com/ThomasTJdev/nimpackages">Thomas T. Jarloev (TTJ)</a><br>Hosted by <a href="https://cxplanner.com">CxPlanner</a><br>We love <a href="https://nim-lang.org">Nim</a>
     </div>
     <script>""" & js & """</script>
   </body>
@@ -475,19 +480,22 @@ proc indexPackagesSearch*(query: string): string =
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    """ & getEnv("HTML_HEAD") & """
     <title>Search Results - Nim Packages</title>
     <style>""" & css & """</style>
   </head>
   <body>
     <div class="container">
       <div class="header">
-        <div style="display: flex; justify-content: center; align-items: center; gap: 20px; ">
-          <div class="stat-number" style="position: relative;">
-            <span style="position: absolute; top: -8px; left: 50%; transform: translateX(-50%); font-size: 0.8em;">👑</span>
-            <span style="margin-top: 8px; display: inline-block;">📦</span>
+        <a href="/">
+          <div style="display: flex; justify-content: center; align-items: center; gap: 20px; ">
+            <div class="stat-number" style="position: relative;">
+              <span style="position: absolute; top: -8px; left: 50%; transform: translateX(-50%); font-size: 0.8em;">👑</span>
+              <span style="margin-top: 8px; display: inline-block;">📦</span>
+            </div>
+            <h1>Nim Packages</h1>
           </div>
-          <h1>Nim Packages</h1>
-        </div>
+        </a>
         <p>Search Results</p>
       </div>
 
@@ -514,8 +522,8 @@ proc indexPackagesSearch*(query: string): string =
         """ & resultsHtml & """
       </div>
     </div>
-    <div style="text-align: center; padding: 20px; color: #666;">
-      Copyright Thomas T. Jarløv (TTJ) - ttj@ttj.dk
+    <div class="footer">
+      Copyright <a href="https://github.com/ThomasTJdev/nimpackages">Thomas T. Jarloev (TTJ)</a><br>Hosted by <a href="https://cxplanner.com">CxPlanner</a><br>We love <a href="https://nim-lang.org">Nim</a>
     </div>
     <script>""" & js & """</script>
   </body>
@@ -532,19 +540,22 @@ proc packageDetails*(name: string): string =
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      """ & getEnv("HTML_HEAD") & """
       <title>Package Not Found - Nim Packages</title>
       <style>""" & css & """</style>
     </head>
     <body>
       <div class="container">
         <div class="header">
-          <div style="display: flex; justify-content: center; align-items: center; gap: 20px; ">
-            <div class="stat-number" style="position: relative;">
-              <span style="position: absolute; top: -8px; left: 50%; transform: translateX(-50%); font-size: 0.8em;">👑</span>
-              <span style="margin-top: 8px; display: inline-block;">📦</span>
+          <a href="/">
+            <div style="display: flex; justify-content: center; align-items: center; gap: 20px; ">
+              <div class="stat-number" style="position: relative;">
+                <span style="position: absolute; top: -8px; left: 50%; transform: translateX(-50%); font-size: 0.8em;">👑</span>
+                <span style="margin-top: 8px; display: inline-block;">📦</span>
+              </div>
+              <h1>Nim Packages</h1>
             </div>
-            <h1>Nim Packages</h1>
-          </div>
+          </a>
           <p>Package Not Found</p>
         </div>
         <div class="package-details">
@@ -555,8 +566,8 @@ proc packageDetails*(name: string): string =
           </div>
         </div>
       </div>
-      <div style="text-align: center; padding: 20px; color: #666;">
-        Copyright Thomas T. Jarløv (TTJ) - ttj@ttj.dk
+      <div class="footer">
+        Copyright <a href="https://github.com/ThomasTJdev/nimpackages">Thomas T. Jarloev (TTJ)</a><br>Hosted by <a href="https://cxplanner.com">CxPlanner</a><br>We love <a href="https://nim-lang.org">Nim</a>
       </div>
     </body>
     </html>
@@ -570,19 +581,22 @@ proc packageDetails*(name: string): string =
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    """ & getEnv("HTML_HEAD") & """
     <title>""" & package.name.xmlEncode & """ - Nim Packages</title>
     <style>""" & css & """</style>
   </head>
   <body>
     <div class="container">
       <div class="header">
-        <div style="display: flex; justify-content: center; align-items: center; gap: 20px; ">
-          <div class="stat-number" style="position: relative;">
-            <span style="position: absolute; top: -8px; left: 50%; transform: translateX(-50%); font-size: 0.8em;">👑</span>
-            <span style="margin-top: 8px; display: inline-block;">📦</span>
+        <a href="/">
+          <div style="display: flex; justify-content: center; align-items: center; gap: 20px; ">
+            <div class="stat-number" style="position: relative;">
+              <span style="position: absolute; top: -8px; left: 50%; transform: translateX(-50%); font-size: 0.8em;">👑</span>
+              <span style="margin-top: 8px; display: inline-block;">📦</span>
+            </div>
+            <h1>Nim Packages</h1>
           </div>
-          <h1>Nim Packages</h1>
-        </div>
+        </a>
         <p>Package Details</p>
       </div>
 
@@ -621,8 +635,12 @@ proc packageDetails*(name: string): string =
         </div>
       </div>
     </div>
-    <div style="text-align: center; padding: 20px; color: #666;">
-      Copyright Thomas T. Jarløv (TTJ) - ttj@ttj.dk
+    <div class="footer">
+      Copyright <a href="https://github.com/ThomasTJdev/nimpackages">Thomas T. Jarloev (TTJ)</a><br>Hosted by <a href="https://cxplanner.com">CxPlanner</a><br>We love <a href="https://nim-lang.org">Nim</a>
+    </div>
+  </body>
+  </html>
+  """
     </div>
   </body>
   </html>
