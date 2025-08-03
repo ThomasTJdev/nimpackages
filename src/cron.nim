@@ -1,12 +1,18 @@
 import std/[
+  envvars,
   httpclient,
   os,
   json,
-  times
+  options,
+  strutils,
+  times,
+  uri
 ]
+
 import ready
 
 import ./cache
+import ./package_fetching
 
 proc updatePackages*() {.thread.} =
   var packages: JsonNode
@@ -66,3 +72,75 @@ proc updatePackages*() {.thread.} =
 
   echo "Packages updated"
   sleep(43200 * 1000)
+
+
+proc updatePackagesWithRepoInfo*() {.thread.} =
+  ## Update packages and enrich with repository info daily (GitHub, GitLab, Codeberg)
+  while true:
+    echo "Updating packages with repository info..."
+
+    # Create a single HTTP client for all requests
+    let client = newHttpClient()
+    client.headers = newHttpHeaders({
+      "User-Agent": "nimpackages/1.0"
+    })
+
+    var processedCount = 0
+    var enrichedCount = 0
+    try:
+      # Get all packages
+      cachePool.withConnection conn:
+        let packageNames = conn.command("SMEMBERS", "package_names")
+        let names = packageNames.to(seq[string])
+
+        for name in names:
+          # Get package info
+          let hash = conn.command("HGETALL", "package:" & name)
+          let hashArray = hash.to(seq[Option[string]])
+
+          if hashArray.len > 0:
+            var url = ""
+            # Extract URL from hash
+            for i in countup(0, hashArray.len - 2, 2):
+              let key = hashArray[i].get("")
+              let value = hashArray[i + 1]
+              if key == "url" and value.isSome:
+                url = value.get
+                break
+
+            # Fetch repository info if it's a supported platform
+            let (_, _, platform) = extractRepoInfo(url)
+            if platform.len > 0:
+              let info = fetchPackageRepoInfo(name, url, client)
+              if info.isSome:
+                discard conn.command("HSET", "package:" & name,
+                  "latest_version", info.get["latest_version"].getStr(),
+                  "latest_update_date", info.get["latest_update_date"].getStr(),
+                  "repo_last_checked", info.get["last_checked"].getStr(),
+                  "repo_platform", info.get["platform"].getStr()
+                )
+                enrichedCount.inc()
+
+              # Rate limiting: sleep 1 second between requests to be respectful
+              sleep(1000)
+
+            processedCount.inc()
+
+            when defined(dev):
+              echo "Processed $1 packages, enriched $2 with $3 info" % [$processedCount, $url, $platform]
+              if processedCount > 5:
+                break
+
+            # Progress update every 100 packages
+            if processedCount mod 100 == 0:
+              echo "Processed $1 packages, enriched $2 with repository info" % [$processedCount, $enrichedCount]
+
+      echo "Completed: processed $1 packages, enriched $2 with repository info" % [$processedCount, $enrichedCount]
+
+    finally:
+      client.close()
+
+    # Sleep for 24 hours (86400 seconds)
+    sleep(86400 * 1000)
+
+

@@ -26,6 +26,7 @@ RequiresMountsFor=%t/containers
 
 [Service]
 Environment=PODMAN_SYSTEMD_UNIT=%n
+Environment="HTML_HEAD=<script defer src='my-tracking-script.js'></script>"
 Restart=always
 RestartSec=3
 TimeoutStopSec=70
@@ -43,6 +44,10 @@ ExecStart=/usr/bin/podman run \
         --label io.containers.autoupdate=registry \
         --log-driver journald \
         --log-opt tag=nimpackages \
+        -e HTML_HEAD \
+        -e GITHUB_TOKEN=ghp_1234567890 \
+        -e GITLAB_TOKEN=glpat-1234567890 \
+        -e CODEBERG_TOKEN=cb_1234567890 \
         ghcr.io/thomastjdev/nimpackages:latest
 ExecStop=/usr/bin/podman stop \
         --ignore \

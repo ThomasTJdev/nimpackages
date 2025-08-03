@@ -2,8 +2,14 @@ nimcache/
 nimblecache/
 htmldocs/
 packages.json
+packages.codeberg.json
+packages.github.json
+packages.gitlab.json
 nimbledeps/bin
 nimbledeps/pkgcache
 nimbledeps/pkgs
 nimbledeps/nimbledata.json
 nimbledeps/packages_temp.json
+nimpackages
+src/nimpackages
+test.md

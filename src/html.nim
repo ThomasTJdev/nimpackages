@@ -229,12 +229,23 @@ const css = """
     margin-top: 10px;
   }
 
+  .package-updates {
+    display: flex;
+    gap: 15px;
+    justify-content: space-between;
+  }
+
+  .update-info>div {
+    font-size: 12px;
+  }
+
   .tag {
     background: #f0f0f0;
     color: #666;
     padding: 4px 8px;
     border-radius: 15px;
     font-size: 0.8rem;
+    height: fit-content;
   }
 
   .package-details {
@@ -412,6 +423,7 @@ proc indexPackagesAll*(): string =
             <div class="stat-number">""" & lastUpdated.format("yyyy-MM-dd HH:mm:ss") & """</div>
             <div class="stat-label">Last Updated</div>
           </div>
+
           <div class="stat-card">
             <div class="stat-label" style="text-align: left;">Install with Nimble</div>
             <div style="margin-top: 10px; font-family: 'Monaco', 'Menlo', monospace; font-size: 0.8rem; color: #666; text-align: left;">
@@ -456,7 +468,7 @@ proc indexPackagesSearch*(query: string): string =
         <div class="package-card">
           <div class="package-header">
             <a href="""" & package.url & """" target="_blank">""" & package.name & """</a>
-            <span class="package-score">""" & $result.score & """</span>
+            <span class="package-score">Score: """ & $result.score & """</span>
           </div>
           <div class="package-description">""" & package.description & """</div>
           <div class="package-meta">
@@ -465,7 +477,13 @@ proc indexPackagesSearch*(query: string): string =
             <span>🔗 <a href="""" & package.url & """" target="_blank">Repository</a></span>
             <span>🔗 <a href="""" & package.web & """" target="_blank">Website</a></span>
           </div>
-          <div class="package-tags">""" & tagsHtml & """</div>
+          <div class="package-updates">
+            <div class="package-tags">""" & tagsHtml & """</div>
+            <div class="update-info">
+              <div>🔄 Last Updated: """ & package.latestUpdateDate.multiReplace([("T", " "), ("Z", "")]) & """</div>
+              <div>🔄 Last Version: """ & package.latestVersion & """</div>
+            </div>
+          </div>
         </div>
       """
   else:
@@ -630,10 +648,30 @@ proc packageDetails*(name: string): string =
           </div>
         </div>
 
-        <div class="detail-tags">
-          <h3>Tags</h3>
-          <div class="package-tags">""" & tagsHtml & """</div>
+        <div style="display: flex; justify-content: space-between;">
+          <div class="detail-tags">
+            <h3>Tags</h3>
+            <div class="package-tags">""" & tagsHtml & """</div>
+          </div>
+          """ & (if package.latestVersion.len > 0: """
+          <div class="detail-meta" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
+            <h3 style="margin-bottom: 15px; color: #333;">Repository Information</h3>
+            <div class="meta-item">
+              <div class="meta-label">Platform</div>
+              <div class="meta-value">""" & package.repoPlatform.xmlEncode & """</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Latest Version</div>
+              <div class="meta-value">""" & package.latestVersion.xmlEncode & """</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Last Updated</div>
+              <div class="meta-value">""" & package.latestUpdateDate.xmlEncode & """</div>
+            </div>
+          </div>
+          """ else: "") & """
         </div>
+
 
         <div style="margin-top: 30px; text-align: center;">
           <a href="/" class="back-link">← Back to Home</a>

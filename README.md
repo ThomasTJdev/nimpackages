@@ -17,6 +17,15 @@ nimble build
 ./nimpackages
 ```
 
+### Environment variables
+
+```bash
+export HTML_HEAD="custom head"
+export GITHUB_TOKEN=...
+export GITLAB_TOKEN=...
+export CODEBERG_TOKEN=...
+```
+
 ## Dependencies
 
 The dependencies are located locally in the `nimbledeps` folder.

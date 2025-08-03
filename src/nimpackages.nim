@@ -198,8 +198,11 @@ router.head("/", statusHandlerHead)
 router.get("/status", statusHandlerGet)
 
 var thread: Thread[void]
+var githubThread: Thread[void]
+
 proc main() =
   createThread(thread, updatePackages)
+  createThread(githubThread, updatePackagesWithRepoInfo)
 
   let server = newServer(router)
   echo "Serving on http://localhost:8080"

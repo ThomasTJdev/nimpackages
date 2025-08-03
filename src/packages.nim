@@ -16,6 +16,10 @@ type
     license*: string
     web*: string
     tags*: seq[string]
+    latestVersion*: string
+    latestUpdateDate*: string
+    repoLastChecked*: string
+    repoPlatform*: string
 
 type
   SearchResult* = object
@@ -41,6 +45,10 @@ proc getPackage*(name: string): Package =
           of "description": result.description = value.get
           of "license": result.license = value.get
           of "web": result.web = value.get
+          of "latest_version": result.latestVersion = value.get
+          of "latest_update_date": result.latestUpdateDate = value.get
+          of "repo_last_checked": result.repoLastChecked = value.get
+          of "repo_platform": result.repoPlatform = value.get
 
       # Get tags
       let tags = conn.command("SMEMBERS", "package:" & name & ":tags")
@@ -62,12 +70,12 @@ proc searchPackages*(query: string): seq[Package] =
     let names = packageNames.to(seq[string])
     result = @[]
     let queryLower = query.toLowerAscii()
-    
+
     for name in names:
       let package = getPackage(name)
       let nameLower = package.name.toLowerAscii()
       let descLower = package.description.toLowerAscii()
-      
+
       # High-quality matches (score 40+)
       # Exact name match (100)
       if queryLower == nameLower:
@@ -190,6 +198,8 @@ proc getLastUpdated*(): int =
     else:
       result = 0
 
+
+
 proc toJson*(package: Package): JsonNode =
   ## Convert package to JSON
   result = %*{
@@ -199,7 +209,11 @@ proc toJson*(package: Package): JsonNode =
     "description": package.description,
     "license": package.license,
     "web": package.web,
-    "tags": package.tags
+    "tags": package.tags,
+    "latest_version": package.latestVersion,
+    "latest_update_date": package.latestUpdateDate,
+    "repo_last_checked": package.repoLastChecked,
+    "repo_platform": package.repoPlatform
   }
 
 proc toJson*(data: SearchResult): JsonNode =
