@@ -75,9 +75,31 @@ proc updatePackages*() {.thread.} =
 
 
 proc updatePackagesWithRepoInfo*() {.thread.} =
-  ## Update packages and enrich with repository info daily (GitHub, GitLab, Codeberg)
+  ## Update packages and enrich with repository info weekly (GitHub, GitLab, Codeberg)
+  const WEEKLY_INTERVAL_SECONDS = 7 * 24 * 60 * 60  # 7 days in seconds
+  const REDIS_KEY_LAST_REPO_UPDATE = "last_repo_update_timestamp"
+
   while true:
-    echo "Updating packages with repository info..."
+    # Check if we need to run the update
+    var shouldRun = false
+    cachePool.withConnection conn:
+      let lastUpdate = conn.command("GET", REDIS_KEY_LAST_REPO_UPDATE)
+      let lastUpdateOpt = lastUpdate.to(Option[int])
+
+      if lastUpdateOpt.isNone:
+        # First time running, should update
+        shouldRun = true
+      else:
+        let timeSinceLastUpdate = getTime().toUnix() - lastUpdateOpt.get
+        shouldRun = timeSinceLastUpdate >= WEEKLY_INTERVAL_SECONDS
+
+    if not shouldRun:
+      echo "Repository info update not due yet. Sleeping for 1 hour before next check..."
+      sleep(60 * 60 * 1000)  # Sleep for 1 hour before checking again
+      continue
+
+    echo "Starting weekly repository info update..."
+    let updateStartTime = getTime().toUnix()
 
     # Create a single HTTP client for all requests
     let client = newHttpClient()
@@ -135,12 +157,18 @@ proc updatePackagesWithRepoInfo*() {.thread.} =
             if processedCount mod 100 == 0:
               echo "Processed $1 packages, enriched $2 with repository info" % [$processedCount, $enrichedCount]
 
+      # Store the completion timestamp in Redis
+      cachePool.withConnection conn:
+        discard conn.command("SET", REDIS_KEY_LAST_REPO_UPDATE, $updateStartTime)
+        echo "Repository info update completed at timestamp: $1" % [$updateStartTime]
+
       echo "Completed: processed $1 packages, enriched $2 with repository info" % [$processedCount, $enrichedCount]
 
     finally:
       client.close()
 
-    # Sleep for 24 hours (86400 seconds)
-    sleep(86400 * 1000)
+    echo "Repository info update completed. Next update in 7 days."
+    # Sleep for 1 hour before checking if we need to run again
+    sleep(60 * 60 * 1000)
 
 

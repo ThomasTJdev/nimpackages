@@ -90,8 +90,6 @@ proc fetchPackageRepoInfo*(packageName: string, url: string, client: HttpClient)
       echo "Unsupported platform: $1" % platform
       return none(JsonNode)
 
-    echo "Fetching $1 info: $2" % [platform, apiUrl]
-
     # Set authorization header if token is available
     if token.len > 0:
       client.headers["Authorization"] = "Bearer " & token
