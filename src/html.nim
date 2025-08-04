@@ -235,6 +235,12 @@ const css = """
     justify-content: space-between;
   }
 
+  @media (max-width: 768px) {
+    .package-updates {
+      flex-direction: column;
+    }
+  }
+
   .update-info>div {
     font-size: 12px;
   }
