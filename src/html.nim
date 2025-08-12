@@ -384,7 +384,7 @@ proc header(title, canonical, description: string): string =
   <link rel="canonical" href="$2">
   <meta name="description" content="$3">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="$3">
+  <meta property="og:url" content="$2">
   <meta property="og:title" content="$1">
   <meta property="og:description" content="$3">
   <meta property="og:image" content="https://nimpackages.com/nimpackages.png">
