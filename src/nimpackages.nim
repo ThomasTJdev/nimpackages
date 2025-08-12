@@ -13,6 +13,7 @@ import
   ./packages
 
 const favicon = staticRead("../resources/favicon.ico")
+const ogImage = staticRead("../resources/nimpackages.png")
 
 proc indexHandler(request: Request) =
   let html = indexPackagesAll()
@@ -175,11 +176,34 @@ proc faviconHandler(request: Request) =
   headers["Content-Type"] = "image/x-icon"
   resp(Http200, headers, favicon)
 
+proc ogImageHandler(request: Request) =
+  var headers: HttpHeaders
+  headers["Content-Type"] = "image/png"
+  resp(Http200, headers, ogImage)
+
+proc robotsHandler(request: Request) =
+  resp(Http200, ContentType.Text, """User-agent: *
+Allow: /
+Sitemap: https://nimpackages.com/sitemap.xml
+""")
+
+proc sitemapHandler(request: Request) =
+  var headers: HttpHeaders
+  headers["Content-Type"] = "application/xml"
+  resp(Http200, headers, """<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://nimpackages.com/</loc>
+    <lastmod>2025-08-12T09:41:00+00:00</lastmod>
+  </url>
+</urlset>""")
+
 proc statusHandlerHead(request: Request) =
   resp(Http200)
 
 proc statusHandlerGet(request: Request) =
   resp(Http200, ContentType.Json, """{"status": "OK"}""")
+
 
 var router: Router
 router.get("/", indexHandler)
@@ -193,6 +217,9 @@ router.get("/api/packages/tag/@tag", tagSearchHandler)
 router.get("/api/packages/@name", packageHandler)
 router.get("/api/stats", statsHandler)
 router.get("/favicon.ico", faviconHandler)
+router.get("/nimpackages.png", ogImageHandler)
+router.get("/robots.txt", robotsHandler)
+router.get("/sitemap.xml", sitemapHandler)
 
 router.head("/", statusHandlerHead)
 router.get("/status", statusHandlerGet)

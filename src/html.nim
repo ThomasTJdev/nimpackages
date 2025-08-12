@@ -376,6 +376,24 @@ const js = """
   });
 """
 
+proc header(title, canonical, description: string): string =
+  let head = ("""<meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <title>$1</title>
+  <link rel="canonical" href="$2">
+  <meta name="description" content="$3">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="$3">
+  <meta property="og:title" content="$1">
+  <meta property="og:description" content="$3">
+  <meta property="og:image" content="https://nimpackages.com/nimpackages.png">
+  <meta name="twitter:card" content="summary_large_image">
+  $4
+  """.format(title, canonical, description, getEnv("HTML_HEAD")))
+
+  return head & """<style>""" & css & """  </style>""" & "\n"
+
 proc indexPackagesAll*(): string =
   let stats = getPackageCount()
   let lastUpdated = getLastUpdated().fromUnix()
@@ -384,12 +402,11 @@ proc indexPackagesAll*(): string =
   <!DOCTYPE html>
   <html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    """ & getEnv("HTML_HEAD") & """
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
-    <title>Nim Packages - Discover Nim Libraries</title>
-    <style>""" & css & """</style>
+  """ & header(
+    "Nim Packages - Discover Nim Libraries",
+    "https://nimpackages.com/",
+    "Search and discover Nim libraries and Nimble packages. Browse package stats, last updates, and install quickly with Nimble."
+  ) & """
   </head>
   <body>
     <div class="container">
@@ -455,6 +472,19 @@ proc indexPackagesAll*(): string =
       Copyright <a href="https://github.com/ThomasTJdev/nimpackages">Thomas T. Jarloev (TTJ)</a><br>Hosted by <a href="https://cxplanner.com">CxPlanner</a><br>We love <a href="https://nim-lang.org">Nim</a>
     </div>
     <script>""" & js & """</script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Nim Packages",
+      "url": "https://nimpackages.com/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://nimpackages.com/search?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
   </body>
   </html>
   """
@@ -504,6 +534,11 @@ proc indexPackagesSearch*(query: string): string =
   <!DOCTYPE html>
   <html lang="en">
   <head>
+    """ & header(
+      "Search Results - Nim Packages",
+      "https://nimpackages.com/search?q=" & query.xmlEncode,
+      "Nim packages search results for '" & query.xmlEncode & "'"
+    ) & """
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     """ & getEnv("HTML_HEAD") & """
@@ -565,12 +600,11 @@ proc packageDetails*(name: string): string =
     <!DOCTYPE html>
     <html lang="en">
     <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      """ & getEnv("HTML_HEAD") & """
-      <link rel="icon" href="/favicon.ico" type="image/x-icon">
-      <title>Package Not Found - Nim Packages</title>
-      <style>""" & css & """</style>
+      """ & header(
+        "Package Not Found - Nim Packages",
+        "https://nimpackages.com/package/" & name.xmlEncode,
+        "Nim package '" & name.xmlEncode & "' not found"
+      ) & """
     </head>
     <body>
       <div class="container">
@@ -607,12 +641,11 @@ proc packageDetails*(name: string): string =
   <!DOCTYPE html>
   <html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    """ & getEnv("HTML_HEAD") & """
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
-    <title>""" & package.name.xmlEncode & """ - Nim Packages</title>
-    <style>""" & css & """</style>
+    """ & header(
+      package.name.xmlEncode & " - Nim Packages",
+      "https://nimpackages.com/package/" & name.xmlEncode,
+      "Nim package '" & name.xmlEncode & "' details"
+    ) & """
   </head>
   <body>
     <div class="container">
@@ -696,12 +729,11 @@ proc apiEndpoints*(): string =
   <!DOCTYPE html>
   <html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    """ & getEnv("HTML_HEAD") & """
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
-    <title>API Endpoints - Nim Packages</title>
-    <style>""" & css & """</style>
+    """ & header(
+      "API Endpoints - Nim Packages",
+      "https://nimpackages.com/api",
+      "Nim packages API endpoints"
+    ) & """
   </head>
   <body>
     <div class="container">
