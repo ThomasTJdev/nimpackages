@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.1.8"
+version       = "0.1.2"
 author        = "ThomasTJdev"
 description   = "nimpackages"
 license       = "MIT"
