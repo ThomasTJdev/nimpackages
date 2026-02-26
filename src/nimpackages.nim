@@ -236,8 +236,8 @@ proc main() =
     workerThreads = 10,
     maxBodyLen = 1024 * 1024 * 10
   )
-  echo "Serving on http://localhost:8080"
-  server.serve(Port(8080))
+  echo "Serving on http://0.0.0.0:8080"
+  server.serve(Port(8080), "0.0.0.0")
 
 when isMainModule:
   main()

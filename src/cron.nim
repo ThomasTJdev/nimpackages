@@ -33,7 +33,7 @@ proc updatePackages*() {.thread.} =
       packages = response.body.parseJson()
       writeFile("packages.json", $packages)
 
-  if packages.kind != JArray or packages.len == 0:
+  if packages.isNil or packages.kind != JArray or packages.len == 0:
     echo "No packages found"
     return
 
